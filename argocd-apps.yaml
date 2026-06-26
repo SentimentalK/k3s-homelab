@@ -69,7 +69,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://registry-1.docker.io/bitnamicharts/sealed-secrets
+    repoURL: registry-1.docker.io/bitnamicharts
+    chart: sealed-secrets
     targetRevision: 2.18.5
     helm:
       releaseName: sealed-secrets
