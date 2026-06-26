@@ -56,7 +56,9 @@ spec:
       selfHeal: true
 
 ---
-# 3. Sealed Secrets Operator (Helm)
+# 3. Sealed Secrets Operator (Helm via OCI)
+# NOTE: The old HTTP Helm repos (bitnami-labs & bitnami) are deprecated.
+# The canonical source is now the Bitnami OCI registry.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -67,9 +69,10 @@ metadata:
 spec:
   project: default
   source:
-    chart: sealed-secrets
-    repoURL: https://bitnami.github.io/sealed-secrets
-    targetRevision: 2.12.0
+    repoURL: oci://registry-1.docker.io/bitnamicharts/sealed-secrets
+    targetRevision: 2.18.5
+    helm:
+      releaseName: sealed-secrets
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
