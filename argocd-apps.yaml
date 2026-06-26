@@ -1,7 +1,43 @@
+# Root "App of Apps" configuration for the homelab.
+# Applying this file once to your cluster will tell ArgoCD to deploy and manage
+# all components declared in this repository.
+#
+# NOTE: Update the `repoURL` below if your GitHub repository is named differently.
+
+# 1. Cert-Manager Operator (Helm)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cert-manager
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    chart: cert-manager
+    repoURL: https://charts.jetstack.io
+    targetRevision: v1.12.0
+    helm:
+      parameters:
+        - name: installCRDs
+          value: "true"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+---
+# 2. Cert-Manager Issuers (Git)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-issuers
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -18,10 +54,9 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
 
 ---
+# 3. Sealed Secrets Operator (Helm)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -32,9 +67,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/SentimentalK/k3s-homelab.git
-    targetRevision: HEAD
-    path: cluster-tools/sealed-secrets
+    chart: sealed-secrets
+    repoURL: https://bitnami.github.io/sealed-secrets
+    targetRevision: 2.12.0
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
@@ -44,19 +79,36 @@ spec:
       selfHeal: true
 
 ---
+# 4. ArgoCD Self-Management & Ingress Configuration (Helm)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-self-managed
+  name: argocd
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/SentimentalK/k3s-homelab.git
-    targetRevision: HEAD
-    path: cluster-tools/argocd
+    chart: argo-cd
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 5.34.1
+    helm:
+      values: |
+        server:
+          extraArgs:
+            - --insecure
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            hosts:
+              - argocd.sentimentalk.com
+            tls:
+              - secretName: argocd-server-tls
+                hosts:
+                  - argocd.sentimentalk.com
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -66,6 +118,7 @@ spec:
       selfHeal: true
 
 ---
+# 5. Reliquary Application (Git)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
