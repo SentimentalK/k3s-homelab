@@ -10,8 +10,6 @@ kind: Application
 metadata:
   name: cert-manager
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -39,8 +37,6 @@ kind: Application
 metadata:
   name: cert-manager-issuers
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -62,8 +58,6 @@ kind: Application
 metadata:
   name: sealed-secrets
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -85,8 +79,6 @@ kind: Application
 metadata:
   name: app-reliquary
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
