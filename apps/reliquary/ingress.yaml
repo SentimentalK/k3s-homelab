@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reliquary
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: reliquary.sentimentalk.com
+      http:
+        paths:
+          # Route API traffic to FastAPI backend
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: reliquary-backend
+                port:
+                  number: 8080
+          # Route all other web traffic to Next.js frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: reliquary-frontend
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - reliquary.sentimentalk.com
+      secretName: reliquary-tls

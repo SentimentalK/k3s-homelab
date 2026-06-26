@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reliquary-backend
+  namespace: default
+  labels:
+    app: reliquary-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reliquary-backend
+  template:
+    metadata:
+      labels:
+        app: reliquary-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/sentimentalk/reliquary-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: reliquary-secrets
+                  key: GROQ_API_KEY
+            - name: DEFAULT_PIPELINE
+              value: "raw_whisper"
+            - name: ADMIN_INVITE_CODE
+              valueFrom:
+                secretKeyRef:
+                  name: reliquary-secrets
+                  key: ADMIN_INVITE_CODE
+            - name: USER_INVITE_CODE
+              valueFrom:
+                secretKeyRef:
+                  name: reliquary-secrets
+                  key: USER_INVITE_CODE
+            - name: REQUIRE_AUTH
+              value: "true"
+            - name: STORAGE_ROOT
+              value: "/app/data"
+            - name: TZ
+              value: "America/Toronto"
+          volumeMounts:
+            - name: backend-storage
+              mountPath: /app/data
+          resources:
+            limits:
+              cpu: "1.5"
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: backend-storage
+          persistentVolumeClaim:
+            claimName: reliquary-backend-data
+      # Target MTL0 (ARM64) which has more resources.
+      # Change 'arm64' to 'amd64' if your backend container image is only built for x86.
+      nodeSelector:
+        kubernetes.io/arch: arm64

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reliquary-frontend
+  namespace: default
+  labels:
+    app: reliquary-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reliquary-frontend
+  template:
+    metadata:
+      labels:
+        app: reliquary-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/sentimentalk/reliquary-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+      # Target MTL0 (ARM64) node. Change to 'amd64' if your image is not compiled for ARM64.
+      nodeSelector:
+        kubernetes.io/arch: arm64
