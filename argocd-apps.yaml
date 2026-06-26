@@ -79,45 +79,6 @@ spec:
       selfHeal: true
 
 ---
-# 4. ArgoCD Self-Management & Ingress Configuration (Helm)
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: argocd
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    chart: argo-cd
-    repoURL: https://argoproj.github.io/argo-helm
-    targetRevision: 5.34.1
-    helm:
-      values: |
-        server:
-          extraArgs:
-            - --insecure
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            annotations:
-              cert-manager.io/cluster-issuer: letsencrypt-prod
-            hosts:
-              - argocd.sentimentalk.com
-            tls:
-              - secretName: argocd-server-tls
-                hosts:
-                  - argocd.sentimentalk.com
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-
----
 # 5. Reliquary Application (Git)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
