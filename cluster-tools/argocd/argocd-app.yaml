@@ -12,9 +12,21 @@ spec:
     repoURL: https://argoproj.github.io/argo-helm
     targetRevision: 5.34.1
     helm:
-      parameters:
-        - name: server.extraArgs[0]
-          value: "--insecure"
+      values: |
+        server:
+          extraArgs:
+            - --insecure
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+            hosts:
+              - argocd.sentimentalk.com
+            tls:
+              - secretName: argocd-server-tls
+                hosts:
+                  - argocd.sentimentalk.com
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
