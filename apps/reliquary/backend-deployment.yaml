@@ -74,8 +74,9 @@ spec:
             failureThreshold: 3
       volumes:
         - name: backend-storage
-          persistentVolumeClaim:
-            claimName: reliquary-backend-data
+          hostPath:
+            path: /home/ubuntu/codes/reliquary/data
+            type: Directory
       # Target MTL0 (ARM64) which has more resources.
       # Change 'arm64' to 'amd64' if your backend container image is only built for x86.
       nodeSelector:
