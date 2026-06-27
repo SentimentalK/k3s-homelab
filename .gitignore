@@ -1,3 +1,4 @@
 *.pem
 .env
 apps/reliquary/secret.yaml
+generated/
