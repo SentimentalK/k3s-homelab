@@ -20,7 +20,7 @@ spec:
             - host: headlamp.sentimentalk.com
               paths:
                 - path: /
-                  pathType: Prefix
+                  type: Prefix
           tls:
             - secretName: headlamp-tls
               hosts:
