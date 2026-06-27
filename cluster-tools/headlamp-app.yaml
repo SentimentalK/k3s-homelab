@@ -25,6 +25,8 @@ spec:
             - secretName: headlamp-tls
               hosts:
                 - headlamp.sentimentalk.com
+        nodeSelector:
+          kubernetes.io/hostname: mtl0
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system

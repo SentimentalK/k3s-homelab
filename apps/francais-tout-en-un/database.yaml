@@ -19,7 +19,7 @@ spec:
         - name: database
           image: ghcr.io/sentimentalk/francais_tout_en_un/database:latest
           imagePullPolicy: IfNotPresent
-          environment:
+          env:
             - name: POSTGRES_USER
               value: "postgres"
             - name: POSTGRES_PASSWORD

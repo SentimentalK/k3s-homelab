@@ -19,7 +19,7 @@ spec:
         - name: entitlement-service
           image: ghcr.io/sentimentalk/francais_tout_en_un/entitlement_service:latest
           imagePullPolicy: IfNotPresent
-          environment:
+          env:
             - name: SERVICE_PORT
               value: "8004"
             - name: DATABASE_URL
