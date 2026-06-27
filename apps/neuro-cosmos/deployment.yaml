@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neuro-cosmos
+  namespace: default
+  labels:
+    app: neuro-cosmos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neuro-cosmos
+  template:
+    metadata:
+      labels:
+        app: neuro-cosmos
+    spec:
+      containers:
+        - name: neuro-cosmos
+          image: ghcr.io/sentimentalk/neuro_cosmos:master
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+      # Target MTL0 (ARM64) node.
+      nodeSelector:
+        kubernetes.io/arch: arm64

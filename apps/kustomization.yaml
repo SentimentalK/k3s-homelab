@@ -4,3 +4,4 @@ resources:
   - reliquary-app.yaml
   - n8n-app.yaml
   - snoopy-app.yaml
+  - neuro-cosmos-app.yaml
