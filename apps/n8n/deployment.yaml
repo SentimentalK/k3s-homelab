@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: default
+  labels:
+    app: n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      containers:
+        - name: n8n
+          image: docker.n8n.io/n8nio/n8n:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5678
+              name: http
+          env:
+            - name: N8N_HOST
+              value: "localhost"
+            - name: N8N_PORT
+              value: "5678"
+            - name: N8N_PROTOCOL
+              value: "http"
+            - name: NODE_ENV
+              value: "development"
+            - name: WEBHOOK_URL
+              value: "https://n8n.sentimentalk.com/"
+            - name: GENERIC_TIMEZONE
+              value: "America/Toronto"
+            - name: N8N_BASIC_AUTH_ACTIVE
+              value: "true"
+            - name: N8N_SKIP_WELCOME_SCREEN
+              value: "true"
+          volumeMounts:
+            - name: n8n-storage
+              mountPath: /home/node/.n8n
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+      volumes:
+        - name: n8n-storage
+          hostPath:
+            path: /home/ubuntu/codes/n8n/data
+            type: DirectoryOrCreate
+      # Target MTL0 (ARM64) node.
+      nodeSelector:
+        kubernetes.io/arch: arm64
