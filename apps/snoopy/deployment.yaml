@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snoopy
+  namespace: default
+  labels:
+    app: snoopy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snoopy
+  template:
+    metadata:
+      labels:
+        app: snoopy
+    spec:
+      containers:
+        - name: snoopy
+          image: ghcr.io/sentimentalk/snoopy:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+      # Target MTL0 (ARM64) node.
+      nodeSelector:
+        kubernetes.io/arch: arm64
