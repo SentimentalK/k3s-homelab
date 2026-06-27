@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/sentimentalk/reliquary-backend:latest
+          image: ghcr.io/sentimentalk/reliquary-backend:v1.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -46,6 +46,8 @@ spec:
               value: "/app/data"
             - name: TZ
               value: "America/Toronto"
+            - name: SENSEVOICE_API_URL
+              value: "http://reliquary-sensevoice:8000"
           volumeMounts:
             - name: backend-storage
               mountPath: /app/data

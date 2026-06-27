@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/sentimentalk/reliquary-frontend:latest
+          image: ghcr.io/sentimentalk/reliquary-frontend:v1.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000

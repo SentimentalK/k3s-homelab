@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reliquary-sensevoice
+  namespace: default
+  labels:
+    app: reliquary-sensevoice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reliquary-sensevoice
+  template:
+    metadata:
+      labels:
+        app: reliquary-sensevoice
+    spec:
+      containers:
+        - name: sensevoice
+          image: ghcr.io/sentimentalk/reliquery-sensevoice:v1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: SENSEVOICE_DEVICE
+              value: "cpu"
+            - name: MODELSCOPE_CACHE
+              value: "/models"
+          volumeMounts:
+            - name: model-storage
+              mountPath: /models
+          resources:
+            limits:
+              cpu: "2.0"
+              memory: 4Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+      volumes:
+        - name: model-storage
+          hostPath:
+            path: /home/ubuntu/codes/reliquary/models
+            type: DirectoryOrCreate
+      # Target MTL0 (ARM64) node.
+      nodeSelector:
+        kubernetes.io/arch: arm64
