@@ -93,7 +93,41 @@ sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert \
   > pub-cert.pem
 ```
 
-> [!NOTE]
-> **Cert-Manager Race Condition & Webhook Delay**:
-> Because `cert-manager` and `cert-manager-issuers` are deployed simultaneously via the root Kustomization, the `ClusterIssuer` resources may fail on the first attempt before the cert-manager webhook pod is fully ready to validate resources. ArgoCD's automated `selfHeal` and retries will automatically resolve this within 1-2 minutes. Expect a brief initial `OutOfSync` / `Degraded` status on `cert-manager-issuers` which will resolve itself automatically.
+---
+
+## Step 7: Retrieve the ArgoCD admin password
+Fetch the initial ArgoCD admin password from the secret:
+
+```bash
+sudo kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+```
+
+---
+
+## Step 8: Seal the secret
+Use the downloaded public certificate to generate the sealed secret for the app:
+
+```bash
+kubeseal --format=yaml --cert=pub-cert.pem < apps/reliquary/secret.yaml > apps/reliquary/sealed-secret.yaml
+```
+
+---
+
+## Step 9: Add additional cluster nodes
+If you want to join more nodes to the K3s cluster, retrieve the server token and run the agent install command on each new node.
+
+```bash
+sudo cat /var/lib/rancher/k3s/server/node-token
+```
+
+```bash
+curl -sfL https://get.k3s.io | \
+  K3S_URL=https://<control-plane-ip>:6443 \
+  K3S_TOKEN=<server-token> \
+  sh -
+```
+
+> **Cert-Manager race condition note**
+> When `cert-manager` and `cert-manager-issuers` are deployed at the same time via the root Kustomization, the `ClusterIssuer` resources may fail initially while the webhook is still starting. ArgoCD usually recovers automatically within 1–2 minutes, so an early `OutOfSync` or `Degraded` status is expected.
 
