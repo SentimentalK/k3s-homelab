@@ -35,10 +35,12 @@ Deploy ArgoCD components cleanly without Helm management to prevent self-managem
 sudo kubectl create namespace argocd
 
 # 2. Deploy stable ArgoCD manifests
-sudo kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+sudo kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 # 3. Wait for all ArgoCD components to be ready
-sudo kubectl wait --for=condition=ready pod --all -n argocd --timeout=300s
+sudo kubectl rollout status deployment/argocd-server -n argocd
+sudo kubectl get pods -n argocd
+sudo kubectl get crd | grep argoproj.io
 ```
 
 ---
@@ -76,6 +78,7 @@ sudo kubectl apply -f bootstrap/root-app.yaml
 
 ## Step 6: Verify and Fetch Sealed Secrets Certificate
 Wait for the apps to synchronize and fetch the sealed secrets public certificate:
+
 ```bash
 # 1. Verify homelab-root is applied and has synced sub-applications (cluster-tools and apps)
 sudo kubectl get applications -n argocd
@@ -83,12 +86,14 @@ sudo kubectl get applications -n argocd
 # 2. Verify sealed-secrets pod is running in kube-system
 sudo kubectl get pods -n kube-system | grep sealed
 
-# 3. Create the directory for generated certs
-mkdir -p generated
-
-# 4. Fetch the public certificate and save it to the generated folder
+# 3. Fetch the public certificate and save it to the generated folder
 sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubeseal --fetch-cert \
   --controller-name=sealed-secrets \
   --controller-namespace=kube-system \
-  > generated/pub-cert.pem
+  > pub-cert.pem
 ```
+
+> [!NOTE]
+> **Cert-Manager Race Condition & Webhook Delay**:
+> Because `cert-manager` and `cert-manager-issuers` are deployed simultaneously via the root Kustomization, the `ClusterIssuer` resources may fail on the first attempt before the cert-manager webhook pod is fully ready to validate resources. ArgoCD's automated `selfHeal` and retries will automatically resolve this within 1-2 minutes. Expect a brief initial `OutOfSync` / `Degraded` status on `cert-manager-issuers` which will resolve itself automatically.
+

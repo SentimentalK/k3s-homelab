@@ -4,9 +4,9 @@ metadata:
   name: reliquary
   namespace: default
   annotations:
-    kubernetes.io/ingress.class: traefik
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  ingressClassName: traefik
   rules:
     - host: reliquary.sentimentalk.com
       http:
