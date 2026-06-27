@@ -4,3 +4,5 @@ resources:
   - cert-manager-app.yaml
   - cert-manager-issuers-app.yaml
   - sealed-secrets-app.yaml
+  - headlamp-app.yaml
+  - headlamp-admin-app.yaml
