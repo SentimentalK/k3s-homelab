@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: one-database
+  namespace: default
+  labels:
+    app: one-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: one-database
+  template:
+    metadata:
+      labels:
+        app: one-database
+    spec:
+      containers:
+        - name: database
+          image: ghcr.io/sentimentalk/francais_tout_en_un/database:latest
+          imagePullPolicy: IfNotPresent
+          environment:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "1"
+            - name: POSTGRES_DB
+              value: "onedb"
+          ports:
+            - containerPort: 5432
+              name: dbport
+          volumeMounts:
+            - name: db-storage
+              mountPath: /var/lib/postgresql/data
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+      volumes:
+        - name: db-storage
+          hostPath:
+            path: /home/ubuntu/codes/francais_tout_en_un/db_data
+            type: DirectoryOrCreate
+      nodeSelector:
+        kubernetes.io/arch: arm64
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: one-database
+  namespace: default
+  labels:
+    app: one-database
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
+  selector:
+    app: one-database
+  type: ClusterIP

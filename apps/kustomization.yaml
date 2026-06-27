@@ -5,3 +5,4 @@ resources:
   - n8n-app.yaml
   - snoopy-app.yaml
   - neuro-cosmos-app.yaml
+  - francais-tout-en-un-app.yaml
