@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: neuro-cosmos.sentimentalk.com
+    - host: neuro.sentimentalk.com
       http:
         paths:
           - path: /
@@ -20,5 +20,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - neuro-cosmos.sentimentalk.com
+        - neuro.sentimentalk.com
       secretName: neuro-cosmos-tls
