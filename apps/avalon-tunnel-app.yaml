@@ -11,7 +11,7 @@ spec:
     path: apps/avalon-tunnel
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: vpn
   syncPolicy:
     automated:
       prune: true
