@@ -43,7 +43,7 @@ spec:
         - name: v2ray
           image: v2fly/v2fly-core:latest
           imagePullPolicy: IfNotPresent
-          command: ["run", "-c", "/app/config/config.json"]
+          command: ["v2ray", "run", "-c", "/app/config/config.json"]
           volumeMounts:
             - name: config-volume
               mountPath: /app/config
