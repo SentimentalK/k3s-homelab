@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: avalon-tunnel
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: avalon.sentimentalk.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: avalon-gateway
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - avalon.sentimentalk.com
+      secretName: avalon-tls

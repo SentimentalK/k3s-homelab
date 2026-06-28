@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avalon-tunnel
+  namespace: default
+  labels:
+    app: avalon-tunnel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avalon-tunnel
+  template:
+    metadata:
+      labels:
+        app: avalon-tunnel
+    spec:
+      containers:
+        # 1. API Server (which serves both the management REST API and the dynamic decoy site)
+        - name: api
+          image: ghcr.io/sentimentalk/avalon-tunnel:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: api-port
+          env:
+            - name: DOMAIN
+              value: "avalon.sentimentalk.com"
+            - name: BASE_DIR
+              value: "/app/config"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+        # 2. V2Ray Core
+        - name: v2ray
+          image: v2fly/v2fly-core:latest
+          imagePullPolicy: IfNotPresent
+          command: ["run", "-c", "/app/config/config.json"]
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+        # 3. Local Gateway (Traefik) - Hotloads the generated traefik_dynamic.yml config
+        - name: gateway
+          image: traefik:v2.10
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--entryPoints.websecure.address=:80"
+            - "--providers.file.filename=/app/config/traefik_dynamic.yml"
+            - "--providers.file.watch=true"
+            - "--accesslog=true"
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
+      volumes:
+        # Mount the host directory directly to share files (database, config.json, traefik_dynamic.yml)
+        - name: config-volume
+          hostPath:
+            path: /home/ubuntu/codes/Avalon-Tunnel
+            type: DirectoryOrCreate
+      
+      # Pin to mtl2 node
+      nodeSelector:
+        kubernetes.io/hostname: mtl2
