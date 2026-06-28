@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: avalon.sentimentalk.com
+    - host: mtl.sentimentalk.com
       http:
         paths:
           - path: /
@@ -20,5 +20,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - avalon.sentimentalk.com
+        - mtl.sentimentalk.com
       secretName: avalon-tls
