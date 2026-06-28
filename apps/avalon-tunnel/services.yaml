@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: avalon-gateway
-  namespace: default
+  namespace: vpn
   labels:
     app: avalon-tunnel
 spec:

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: avalon-tunnel
-  namespace: default
+  namespace: vpn
   labels:
     app: avalon-tunnel
 spec:
