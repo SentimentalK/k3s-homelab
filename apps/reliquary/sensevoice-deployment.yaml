@@ -41,7 +41,6 @@ spec:
           hostPath:
             path: /home/ubuntu/codes/reliquary/models
             type: DirectoryOrCreate
-      # Target the specific AMD64 node mtl1 to ensure architecture match and hostPath caching consistency
+      # Target MTL0 (ARM64) which has more resources to host ML workloads
       nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/hostname: mtl1
+        kubernetes.io/arch: arm64

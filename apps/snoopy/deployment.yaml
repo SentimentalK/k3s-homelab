@@ -28,6 +28,7 @@ spec:
             requests:
               cpu: 50m
               memory: 64Mi
-      # Target MTL0 (ARM64) node.
+      # Target the specific AMD64 node mtl1
       nodeSelector:
-        kubernetes.io/arch: arm64
+        kubernetes.io/arch: amd64
+        kubernetes.io/hostname: mtl1
