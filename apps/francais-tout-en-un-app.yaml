@@ -11,7 +11,7 @@ spec:
     path: apps/francais-tout-en-un
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: francais-tout-en-un
   syncPolicy:
     automated:
       prune: true

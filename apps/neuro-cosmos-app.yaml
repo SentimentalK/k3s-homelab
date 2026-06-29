@@ -11,7 +11,7 @@ spec:
     path: apps/neuro-cosmos
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: neuro-cosmos
   syncPolicy:
     automated:
       prune: true
