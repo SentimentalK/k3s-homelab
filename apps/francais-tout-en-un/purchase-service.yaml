@@ -24,6 +24,8 @@ spec:
               value: "8003"
             - name: DATABASE_URL
               value: "postgresql://postgres:1@one-database:5432/onedb"
+            - name: COURSE_SERVICE_URL
+              value: "http://course-service:8001/api/courses/"
             - name: REDIS_HOST
               value: "redis"
             - name: REDIS_PORT
