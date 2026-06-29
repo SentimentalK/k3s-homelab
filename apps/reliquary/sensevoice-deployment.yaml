@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: sensevoice
-          image: ghcr.io/sentimentalk/reliquery-sensevoice:v1.1.1
+          image: ghcr.io/sentimentalk/reliquary-sensevoice:v1.1.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -41,6 +41,7 @@ spec:
           hostPath:
             path: /home/ubuntu/codes/reliquary/models
             type: DirectoryOrCreate
-      # Target MTL0 (ARM64) node.
+      # Target the specific AMD64 node mtl1 to ensure architecture match and hostPath caching consistency
       nodeSelector:
-        kubernetes.io/arch: arm64
+        kubernetes.io/arch: amd64
+        kubernetes.io/hostname: mtl1
