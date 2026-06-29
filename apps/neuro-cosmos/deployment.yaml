@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: neuro-cosmos
-  namespace: default
   labels:
     app: neuro-cosmos
 spec:

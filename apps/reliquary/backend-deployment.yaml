@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: reliquary-backend
-  namespace: default
   labels:
     app: reliquary-backend
 spec:
