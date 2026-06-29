@@ -8,4 +8,5 @@ resources:
   - auth-service.yaml
   - course-service.yaml
   - entitlement-service.yaml
+  - purchase-service.yaml
   - react-nginx.yaml

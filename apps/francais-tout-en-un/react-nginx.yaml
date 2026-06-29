@@ -14,6 +14,7 @@ data:
       upstream auth { server auth-service:8000; }
       upstream courses { server course-service:8001; }
       upstream entitlements { server entitlement-service:8004; }
+      upstream purchase { server purchase-service:8003; }
 
       server {
         listen 80;
@@ -41,7 +42,7 @@ data:
           proxy_pass http://courses;
         }
         location /api/purchase {
-          proxy_pass $purchase_upstream;
+          proxy_pass http://purchase;
         }
         location /api/entitlements {
           proxy_pass http://entitlements;
