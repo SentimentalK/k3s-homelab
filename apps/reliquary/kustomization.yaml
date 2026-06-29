@@ -9,6 +9,5 @@ resources:
   - frontend-service.yaml
   - ingress.yaml
   - sealed-secret.yaml
-  - secret.yaml
   - sensevoice-deployment.yaml
   - sensevoice-service.yaml
