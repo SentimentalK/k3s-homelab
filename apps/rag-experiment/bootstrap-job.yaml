@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rag-db-bootstrap
+  namespace: rag-experiment
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: rag-experiment
+      restartPolicy: Never
+      containers:
+        - name: database-bootstrap
+          image: ghcr.io/sentimentalk/rag-experiment-backend:sha-1a29a9cb635189211ec7b37960b739871e3a6b3d
+          imagePullPolicy: IfNotPresent
+          command:
+            - python3
+            - -m
+            - app.cli.bootstrap_database
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://rag_user:rag_password@rag-database:5432/sherlock_rag"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      nodeSelector:
+        kubernetes.io/hostname: mtl3

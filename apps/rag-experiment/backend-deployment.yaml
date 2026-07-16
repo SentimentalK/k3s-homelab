@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: rag-experiment
+  labels:
+    app: backend
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      serviceAccountName: rag-experiment
+      containers:
+        - name: backend
+          image: ghcr.io/sentimentalk/rag-experiment-backend:sha-1a29a9cb635189211ec7b37960b739871e3a6b3d
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://rag_user:rag_password@rag-database:5432/sherlock_rag"
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rag-database
+                  key: groq-api-key
+            - name: GROQ_MODEL
+              value: "openai/gpt-oss-120b"
+            - name: GROQ_BASE_URL
+              value: "https://api.groq.com/openai/v1"
+          livenessProbe:
+            httpGet:
+              path: /api/health/live
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health/ready
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            limits:
+              cpu: "1.5"
+              memory: 2Gi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+      nodeSelector:
+        kubernetes.io/hostname: mtl3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: rag-experiment
+  labels:
+    app: backend
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    app: backend
+  type: ClusterIP

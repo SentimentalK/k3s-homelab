@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rag-experiment
+resources:
+  - serviceaccount.yaml
+  - database.yaml
+  - migrations-configmap.yaml
+  - migration-job.yaml
+  - bootstrap-job.yaml
+  - backend-deployment.yaml
+  - frontend-deployment.yaml
+  - ingress.yaml
+  - sealed-secret.yaml

@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rag-database-data
+  namespace: rag-experiment
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rag-database
+  namespace: rag-experiment
+  labels:
+    app: rag-database
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  serviceName: rag-database
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-database
+  template:
+    metadata:
+      labels:
+        app: rag-database
+    spec:
+      serviceAccountName: rag-experiment
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:0.8.5-pg16
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_DB
+              value: "sherlock_rag"
+            - name: POSTGRES_USER
+              value: "rag_user"
+            - name: POSTGRES_PASSWORD
+              value: "rag_password"
+          ports:
+            - containerPort: 5432
+              name: dbport
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+            - name: migrations
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - "$(POSTGRES_USER)"
+                - -d
+                - "$(POSTGRES_DB)"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: rag-database-data
+        - name: migrations
+          configMap:
+            name: database-migrations-config
+      nodeSelector:
+        kubernetes.io/hostname: mtl3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rag-database
+  namespace: rag-experiment
+  labels:
+    app: rag-database
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
+  selector:
+    app: rag-database
+  type: ClusterIP
