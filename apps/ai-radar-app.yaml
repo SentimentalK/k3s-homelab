@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-ai-radar
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SentimentalK/k3s-homelab.git
+    targetRevision: master
+    path: apps/ai-radar
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ai-radar
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

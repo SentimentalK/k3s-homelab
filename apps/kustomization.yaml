@@ -8,3 +8,4 @@ resources:
   - francais-tout-en-un-app.yaml
   - avalon-tunnel-app.yaml
   - rag-experiment-app.yaml
+  - ai-radar-app.yaml
