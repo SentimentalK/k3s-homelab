@@ -31,6 +31,10 @@ spec:
               psql "$DATABASE_URL" \
                 -v ON_ERROR_STOP=1 \
                 -f /migrations/002_create_base_tables.sql
+
+              psql "$DATABASE_URL" \
+                -v ON_ERROR_STOP=1 \
+                -f /migrations/003_create_experiment_tables.sql
           env:
             - name: DATABASE_URL
               value: "postgresql://rag_user:rag_password@rag-database:5432/sherlock_rag"
