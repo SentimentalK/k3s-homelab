@@ -20,7 +20,7 @@ spec:
       serviceAccountName: rag-experiment
       containers:
         - name: backend
-          image: ghcr.io/sentimentalk/rag-experiment-backend:sha-ddd51e7f11f2d801f0f75e560742eabe2c8be89e
+          image: ghcr.io/sentimentalk/rag-experiment-backend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

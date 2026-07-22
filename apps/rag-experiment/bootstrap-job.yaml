@@ -17,7 +17,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: database-bootstrap
-          image: ghcr.io/sentimentalk/rag-experiment-backend:sha-ddd51e7f11f2d801f0f75e560742eabe2c8be89e
+          image: ghcr.io/sentimentalk/rag-experiment-backend:latest
           imagePullPolicy: Always
           command:
             - python3
