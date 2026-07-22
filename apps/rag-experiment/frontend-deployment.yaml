@@ -20,8 +20,8 @@ spec:
       serviceAccountName: rag-experiment
       containers:
         - name: frontend
-          image: ghcr.io/sentimentalk/rag-experiment-frontend:sha-1a29a9cb635189211ec7b37960b739871e3a6b3d
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/sentimentalk/rag-experiment-frontend:sha-ddd51e7f11f2d801f0f75e560742eabe2c8be89e
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               name: http
