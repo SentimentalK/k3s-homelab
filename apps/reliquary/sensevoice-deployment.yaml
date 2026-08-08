@@ -43,4 +43,4 @@ spec:
             type: DirectoryOrCreate
       # Target MTL0 (ARM64) which has more resources to host ML workloads
       nodeSelector:
-        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
