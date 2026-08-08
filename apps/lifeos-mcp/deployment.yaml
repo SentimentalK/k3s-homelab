@@ -88,8 +88,8 @@ spec:
             - name: tmp
               mountPath: /tmp
         - name: mcp-tunnel
-          image: ghcr.io/openai/tunnel-client:v0.0.10
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/sentimentalk/tunnel-client:v0.0.11
+          imagePullPolicy: Always
           env:
             - name: CONTROL_PLANE_TUNNEL_ID
               valueFrom:
