@@ -31,9 +31,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: lifeos-mcp
-          # Replace with the immutable digest emitted by the LifeOS image workflow.
-          image: ghcr.io/sentimentalk/lifeos-mcp:sha-REPLACE_WITH_LIFEOS_COMMIT
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/sentimentalk/lifeos-mcp:latest
+          imagePullPolicy: Always
           env:
             - name: LIFEOS_DATA_ROOT
               value: /data
