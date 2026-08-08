@@ -45,9 +45,16 @@ spec:
             - name: LIFEOS_KNOWN_HOSTS_PATH
               value: /etc/lifeos-git/known_hosts
             - name: BIND_HOST
-              value: 127.0.0.1
+              value: 0.0.0.0
             - name: PORT
               value: "3000"
+            - name: MCP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lifeos-mcp-auth
+                  key: api-key
+            - name: ALLOWED_HOSTS
+              value: agent.sentimentalk.com,localhost,127.0.0.1
           ports:
             - name: mcp
               containerPort: 3000
@@ -59,17 +66,20 @@ spec:
               cpu: 500m
               memory: 512Mi
           startupProbe:
-            exec:
-              command: ["node", "-e", "fetch('http://127.0.0.1:3000/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+            httpGet:
+              path: /readyz
+              port: 3000
             failureThreshold: 30
             periodSeconds: 5
           readinessProbe:
-            exec:
-              command: ["node", "-e", "fetch('http://127.0.0.1:3000/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+            httpGet:
+              path: /readyz
+              port: 3000
             periodSeconds: 10
           livenessProbe:
-            exec:
-              command: ["node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+            httpGet:
+              path: /healthz
+              port: 3000
             periodSeconds: 20
           securityContext:
             allowPrivilegeEscalation: false
@@ -87,61 +97,6 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
-        - name: mcp-tunnel
-          image: ghcr.io/sentimentalk/tunnel-client:v0.0.11
-          imagePullPolicy: Always
-          env:
-            - name: CONTROL_PLANE_TUNNEL_ID
-              valueFrom:
-                secretKeyRef:
-                  name: lifeos-tunnel
-                  key: tunnel-id
-            - name: CONTROL_PLANE_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: lifeos-tunnel
-                  key: api-key
-            - name: CONTROL_PLANE_BASE_URL
-              value: https://api.openai.com
-            - name: MCP_SERVER_URL
-              value: http://127.0.0.1:3000/mcp
-            - name: LOG_LEVEL
-              value: info
-            - name: LOG_FORMAT
-              value: json
-            - name: HEALTH_LISTEN_ADDR
-              value: ":8080"
-          ports:
-            - name: tunnel-health
-              containerPort: 8080
-          resources:
-            requests:
-              cpu: 25m
-              memory: 64Mi
-            limits:
-              cpu: 250m
-              memory: 256Mi
-          startupProbe:
-            exec:
-              command: ["curl", "-sf", "http://127.0.0.1:8080/healthz"]
-            failureThreshold: 30
-            periodSeconds: 5
-          readinessProbe:
-            exec:
-              command: ["curl", "-sf", "http://127.0.0.1:8080/readyz"]
-            periodSeconds: 10
-          livenessProbe:
-            exec:
-              command: ["curl", "-sf", "http://127.0.0.1:8080/healthz"]
-            periodSeconds: 20
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop: ["ALL"]
-          volumeMounts:
-            - name: tunnel-tmp
-              mountPath: /tmp
       volumes:
         - name: data
           hostPath:
@@ -156,10 +111,6 @@ spec:
             name: lifeos-git-known-hosts
             defaultMode: 0444
         - name: tmp
-          emptyDir:
-            medium: Memory
-            sizeLimit: 64Mi
-        - name: tunnel-tmp
           emptyDir:
             medium: Memory
             sizeLimit: 64Mi
