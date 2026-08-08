@@ -21,6 +21,7 @@ spec:
       terminationGracePeriodSeconds: 30
       nodeSelector:
         kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
         lifeos.sentimentalk.com/workspace: "true"
       securityContext:
         runAsNonRoot: true
