@@ -122,20 +122,17 @@ spec:
               cpu: 250m
               memory: 256Mi
           startupProbe:
-            httpGet:
-              path: /healthz
-              port: tunnel-health
+            exec:
+              command: ["curl", "-sf", "http://127.0.0.1:8080/healthz"]
             failureThreshold: 30
             periodSeconds: 5
           readinessProbe:
-            httpGet:
-              path: /readyz
-              port: tunnel-health
+            exec:
+              command: ["curl", "-sf", "http://127.0.0.1:8080/readyz"]
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: /healthz
-              port: tunnel-health
+            exec:
+              command: ["curl", "-sf", "http://127.0.0.1:8080/healthz"]
             periodSeconds: 20
           securityContext:
             allowPrivilegeEscalation: false
