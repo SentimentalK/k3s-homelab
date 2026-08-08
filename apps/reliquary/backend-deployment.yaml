@@ -77,7 +77,7 @@ spec:
         - name: backend-storage
           hostPath:
             path: /home/ubuntu/codes/reliquary/data
-            type: Directory
+            type: DirectoryOrCreate
       # Target MTL0 (ARM64) which has more resources.
       # Change 'arm64' to 'amd64' if your backend container image is only built for x86.
       nodeSelector:
