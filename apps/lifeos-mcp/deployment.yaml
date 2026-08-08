@@ -90,6 +90,15 @@ spec:
         - name: mcp-tunnel
           image: ghcr.io/sentimentalk/tunnel-client:v0.0.11
           imagePullPolicy: Always
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Waiting for LifeOS MCP (127.0.0.1:3000) to be ready..."
+              until wget -qO- http://127.0.0.1:3000/healthz >/dev/null 2>&1 || curl -s http://127.0.0.1:3000/healthz >/dev/null 2>&1; do
+                sleep 1
+              done
+              echo "LifeOS MCP is ready, starting tunnel-client..."
+              exec /app/tunnel-client run
           env:
             - name: CONTROL_PLANE_TUNNEL_ID
               valueFrom:
