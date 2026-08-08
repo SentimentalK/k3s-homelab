@@ -1,0 +1,169 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lifeos-mcp
+  labels:
+    app: lifeos-mcp
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: lifeos-mcp
+  template:
+    metadata:
+      labels:
+        app: lifeos-mcp
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        lifeos.sentimentalk.com/workspace: "true"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: lifeos-mcp
+          # Replace with the immutable digest emitted by the LifeOS image workflow.
+          image: ghcr.io/sentimentalk/lifeos-mcp:sha-REPLACE_WITH_LIFEOS_COMMIT
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LIFEOS_DATA_ROOT
+              value: /data
+            - name: LIFEOS_REMOTE
+              value: git@github.com:SentimentalK/LifeOS.git
+            - name: LIFEOS_BRANCH
+              value: main
+            - name: LIFEOS_SSH_KEY_PATH
+              value: /var/run/secrets/lifeos-git/ssh-privatekey
+            - name: LIFEOS_KNOWN_HOSTS_PATH
+              value: /etc/lifeos-git/known_hosts
+            - name: BIND_HOST
+              value: 127.0.0.1
+            - name: PORT
+              value: "3000"
+          ports:
+            - name: mcp
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            exec:
+              command: ["node", "-e", "fetch('http://127.0.0.1:3000/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["node", "-e", "fetch('http://127.0.0.1:3000/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: git-key
+              mountPath: /var/run/secrets/lifeos-git
+              readOnly: true
+            - name: git-known-hosts
+              mountPath: /etc/lifeos-git
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+        - name: mcp-tunnel
+          image: ghcr.io/openai/tunnel-client:v0.0.10
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CONTROL_PLANE_TUNNEL_ID
+              valueFrom:
+                secretKeyRef:
+                  name: lifeos-tunnel
+                  key: tunnel-id
+            - name: CONTROL_PLANE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lifeos-tunnel
+                  key: api-key
+            - name: CONTROL_PLANE_BASE_URL
+              value: https://api.openai.com
+            - name: MCP_SERVER_URL
+              value: http://127.0.0.1:3000/mcp
+            - name: LOG_LEVEL
+              value: info
+            - name: LOG_FORMAT
+              value: json
+            - name: HEALTH_LISTEN_ADDR
+              value: ":8080"
+          ports:
+            - name: tunnel-health
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: tunnel-health
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: tunnel-health
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: tunnel-health
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tunnel-tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          hostPath:
+            path: /home/ubuntu/codes/lifeos-mcp
+            type: Directory
+        - name: git-key
+          secret:
+            secretName: lifeos-git
+            defaultMode: 0440
+        - name: git-known-hosts
+          configMap:
+            name: lifeos-git-known-hosts
+            defaultMode: 0444
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+        - name: tunnel-tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
