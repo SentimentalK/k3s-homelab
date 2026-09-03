@@ -9,8 +9,8 @@ spec:
   timeZone: Asia/Shanghai
   schedule: "0 9 * * *"
   concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 15
+  failedJobsHistoryLimit: 15
   jobTemplate:
     spec:
       template:
