@@ -10,3 +10,4 @@ resources:
   - rag-experiment-app.yaml
   - ai-radar-app.yaml
   - lifeos-mcp-app.yaml
+  - tracking-tool-app.yaml

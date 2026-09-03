@@ -1,0 +1,19 @@
+apiVersion: secrets.infisical.com/v1beta1
+kind: InfisicalAuth
+metadata:
+  name: k3s-prod-auth
+  namespace: infisical-operator
+spec:
+  infisicalConnectionRef:
+    name: infisical-cloud
+    namespace: infisical-operator
+  method: universal
+  universal:
+    clientIdRef:
+      name: k3s-prod-credentials
+      namespace: infisical-operator
+      key: clientId
+    clientSecretRef:
+      name: k3s-prod-credentials
+      namespace: infisical-operator
+      key: clientSecret

@@ -6,3 +6,5 @@ resources:
   - sealed-secrets-app.yaml
   - headlamp-app.yaml
   - headlamp-admin-app.yaml
+  - infisical-operator-app.yaml
+  - infisical-auth-app.yaml

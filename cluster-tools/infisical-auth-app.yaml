@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infisical-auth
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SentimentalK/k3s-homelab.git
+    targetRevision: master
+    path: cluster-tools/infisical
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infisical-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

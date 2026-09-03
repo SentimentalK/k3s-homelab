@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tracking-tool
+  namespace: tracking-tool
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: tracking.sentimentalk.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tracking-tool
+                port:
+                  number: 8000
+  tls:
+    - hosts:
+        - tracking.sentimentalk.com
+      secretName: tracking-tool-tls
