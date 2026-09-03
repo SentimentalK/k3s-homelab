@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: tracking-tool-daily
+  name: tracking-tool-birthday
   namespace: tracking-tool
   labels:
     app: tracking-tool
@@ -27,10 +27,10 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           containers:
-            - name: tracking-tool-sync
+            - name: tracking-tool-birthday
               image: ghcr.io/sentimentalk/tracking-tool:latest
               imagePullPolicy: Always
-              command: ["python", "main.py", "--app", "insurance"]
+              command: ["python", "main.py", "--app", "birthday"]
               envFrom:
                 - secretRef:
                     name: tracking-tool-secrets
