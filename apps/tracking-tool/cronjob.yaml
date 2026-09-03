@@ -28,8 +28,8 @@ spec:
               type: RuntimeDefault
           containers:
             - name: tracking-tool-sync
-              image: ghcr.io/sentimentalk/tracking-tool:sha-d1599b9
-              imagePullPolicy: IfNotPresent
+              image: ghcr.io/sentimentalk/tracking-tool:latest
+              imagePullPolicy: Always
               command: ["python", "main.py"]
               envFrom:
                 - secretRef:
