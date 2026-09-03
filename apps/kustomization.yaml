@@ -11,3 +11,4 @@ resources:
   - ai-radar-app.yaml
   - lifeos-mcp-app.yaml
   - tracking-tool-app.yaml
+  - ceo-state-mcp-app.yaml

@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ceo-state-mcp
+  namespace: ceo-state-mcp
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: ceo.sentimentalk.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-state-mcp
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - ceo.sentimentalk.com
+      secretName: ceo-state-mcp-tls

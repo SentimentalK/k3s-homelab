@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ceo-state-mcp
+  namespace: ceo-state-mcp
+  labels:
+    app: ceo-state-mcp
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ceo-state-mcp
+  template:
+    metadata:
+      labels:
+        app: ceo-state-mcp
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ceo-state-mcp
+          image: ghcr.io/sentimentalk/ceo-state-mcp:latest
+          imagePullPolicy: Always
+          env:
+            - name: LIFEOS_DATA_ROOT
+              value: /data
+            - name: LIFEOS_REMOTE
+              value: git@github.com:SentimentalK/ceo-poc-workspace.git
+            - name: LIFEOS_BRANCH
+              value: main
+            - name: LIFEOS_SSH_KEY_PATH
+              value: /var/run/secrets/ceo-git/ssh-privatekey
+            - name: LIFEOS_KNOWN_HOSTS_PATH
+              value: /etc/ceo-git/known_hosts
+            - name: BIND_HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: "3000"
+            - name: MCP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-state-mcp-secrets
+                  key: MCP_API_KEY
+            - name: ALLOWED_HOSTS
+              value: ceo.sentimentalk.com,agent.sentimentalk.com,localhost,127.0.0.1
+          ports:
+            - name: mcp
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /readyz
+              port: 3000
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3000
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: git-key
+              mountPath: /var/run/secrets/ceo-git
+              readOnly: true
+            - name: git-known-hosts
+              mountPath: /etc/ceo-git
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          hostPath:
+            path: /home/ubuntu/codes/ceo-state-mcp
+            type: DirectoryOrCreate
+        - name: git-key
+          secret:
+            secretName: ceo-state-mcp-secrets
+            defaultMode: 0440
+            items:
+              - key: SSH_PRIVATE_KEY
+                path: ssh-privatekey
+        - name: git-known-hosts
+          configMap:
+            name: ceo-git-known-hosts
+            defaultMode: 0444
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
