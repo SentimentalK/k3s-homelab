@@ -37,15 +37,15 @@ spec:
           image: ghcr.io/sentimentalk/ceo-state-mcp:latest
           imagePullPolicy: Always
           env:
-            - name: LIFEOS_DATA_ROOT
+            - name: CEO_DATA_ROOT
               value: /data
-            - name: LIFEOS_REMOTE
+            - name: CEO_REMOTE
               value: git@github.com:SentimentalK/ceo-poc-workspace.git
-            - name: LIFEOS_BRANCH
+            - name: CEO_BRANCH
               value: main
-            - name: LIFEOS_SSH_KEY_PATH
+            - name: CEO_SSH_KEY_PATH
               value: /var/run/secrets/ceo-git/ssh-privatekey
-            - name: LIFEOS_KNOWN_HOSTS_PATH
+            - name: CEO_KNOWN_HOSTS_PATH
               value: /etc/ceo-git/known_hosts
             - name: BIND_HOST
               value: 0.0.0.0
