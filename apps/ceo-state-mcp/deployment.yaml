@@ -40,7 +40,7 @@ spec:
             - name: CEO_DATA_ROOT
               value: /data
             - name: CEO_REMOTE
-              value: git@github.com:SentimentalK/ceo-poc-workspace.git
+              value: git@github.com:SentimentalK/LifeOS.git
             - name: CEO_BRANCH
               value: main
             - name: CEO_SSH_KEY_PATH
