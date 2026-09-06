@@ -58,6 +58,15 @@ spec:
                   key: MCP_API_KEY
             - name: ALLOWED_HOSTS
               value: ceo.sentimentalk.com,agent.sentimentalk.com,localhost,127.0.0.1
+            - name: CONTENT_RESOLVER_URL
+              value: http://content-resolver.content-resolver.svc.cluster.local:8000
+            - name: CONTENT_RESOLVER_TIMEOUT_MS
+              value: "5000"
+            - name: CONTENT_RESOLVER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-state-mcp-secrets
+                  key: TOOLS_INTERNAL_TOKEN
           ports:
             - name: mcp
               containerPort: 3000
