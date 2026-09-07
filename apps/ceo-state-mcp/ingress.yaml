@@ -11,7 +11,21 @@ spec:
     - host: ceo.sentimentalk.com
       http:
         paths:
-          - path: /
+          - path: /audit
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-web
+                port:
+                  number: 8080
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-state-mcp
+                port:
+                  number: 3000
+          - path: /mcp
             pathType: Prefix
             backend:
               service:

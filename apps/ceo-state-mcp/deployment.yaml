@@ -34,7 +34,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: ceo-state-mcp
-          image: ghcr.io/sentimentalk/ceo-state-mcp:latest
+          image: ghcr.io/sentimentalk/ceo-server:latest
           imagePullPolicy: Always
           env:
             - name: CEO_DATA_ROOT
