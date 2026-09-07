@@ -43,11 +43,12 @@ data:
     umask 077
     mkdir -p /run/redis
 
-    # 复制非敏感配置到内存目录
-    cp /etc/redis-config/redis.conf /run/redis/redis.conf
-
-    # 在内存中追加 requirepass（不进 ConfigMap/Git/argv/日志）
-    printf '\nrequirepass %s\n' "$password" >> /run/redis/redis.conf
+    # 非敏感配置与 requirepass 一次写入内存文件（不进 ConfigMap/Git/argv/日志）
+    # umask 077 下重定向创建 0600 文件；避免 cp 保留 0444 只读权限导致追加失败
+    {
+      cat /etc/redis-config/redis.conf
+      printf '\nrequirepass %s\n' "$password"
+    } > /run/redis/redis.conf
 
     exec redis-server /run/redis/redis.conf
   healthcheck.sh: |
