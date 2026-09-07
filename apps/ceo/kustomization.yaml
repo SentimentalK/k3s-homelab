@@ -9,4 +9,7 @@ resources:
   - server-service.yaml
   - web-deployment.yaml
   - web-service.yaml
+  - resolver-infisical-secret.yaml
+  - resolver-deployment.yaml
+  - resolver-service.yaml
   - ingress.yaml

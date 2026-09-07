@@ -12,4 +12,3 @@ resources:
   - lifeos-mcp-app.yaml
   - tracking-tool-app.yaml
   - ceo-app.yaml
-  - ceo-resolver-app.yaml
