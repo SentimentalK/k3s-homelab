@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ceo-server
+  namespace: ceo
+  labels:
+    app: ceo-server
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ceo-server
+  template:
+    metadata:
+      labels:
+        app: ceo-server
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ceo-server
+          image: ghcr.io/sentimentalk/ceo-server:latest
+          imagePullPolicy: Always
+          env:
+            - name: CEO_DATA_ROOT
+              value: /data
+            - name: CEO_REMOTE
+              value: git@github.com:SentimentalK/LifeOS.git
+            - name: CEO_BRANCH
+              value: main
+            - name: CEO_SSH_KEY_PATH
+              value: /var/run/secrets/ceo-git/ssh-privatekey
+            - name: CEO_KNOWN_HOSTS_PATH
+              value: /etc/ceo-git/known_hosts
+            - name: BIND_HOST
+              value: 0.0.0.0
+            - name: PORT
+              value: "3000"
+            - name: MCP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-server-secrets
+                  key: MCP_API_KEY
+            - name: ALLOWED_HOSTS
+              value: ceo.sentimentalk.com,agent.sentimentalk.com,localhost,127.0.0.1
+            - name: CONTENT_RESOLVER_URL
+              value: http://ceo-resolver.ceo.svc.cluster.local:8000
+            - name: CONTENT_RESOLVER_TIMEOUT_MS
+              value: "5000"
+            - name: CONTENT_RESOLVER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-server-secrets
+                  key: TOOLS_INTERNAL_TOKEN
+          ports:
+            - name: mcp
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /readyz
+              port: 3000
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 3000
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: git-key
+              mountPath: /var/run/secrets/ceo-git
+              readOnly: true
+            - name: git-known-hosts
+              mountPath: /etc/ceo-git
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          hostPath:
+            path: /home/ubuntu/codes/ceo-state-mcp
+            type: DirectoryOrCreate
+        - name: git-key
+          secret:
+            secretName: ceo-server-secrets
+            defaultMode: 0440
+            items:
+              - key: SSH_PRIVATE_KEY
+                path: ssh-privatekey
+        - name: git-known-hosts
+          configMap:
+            name: ceo-git-known-hosts
+            defaultMode: 0444
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi

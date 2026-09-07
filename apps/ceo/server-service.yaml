@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ceo-server
+  namespace: ceo
+  labels:
+    app: ceo-server
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: ceo-server
+  type: ClusterIP
