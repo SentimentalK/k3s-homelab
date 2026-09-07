@@ -72,7 +72,14 @@ spec:
                   name: ceo-server-secrets
                   key: TOOLS_INTERNAL_TOKEN
             - name: CEO_BRIDGE_ENABLED
-              value: "false"
+              value: "true"
+            - name: CEO_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-redis-secrets
+                  key: REDIS_PASSWORD
+            - name: CEO_REDIS_URL
+              value: "redis://default:$(CEO_REDIS_PASSWORD)@ceo-redis.ceo.svc.cluster.local:6379/0"
           ports:
             - name: mcp
               containerPort: 3000
