@@ -43,6 +43,10 @@ spec:
               value: git@github.com:SentimentalK/LifeOS.git
             - name: CEO_BRANCH
               value: main
+            - name: CEO_GIT_AUTHOR_NAME
+              value: "SentimentalK"
+            - name: CEO_GIT_AUTHOR_EMAIL
+              value: "kevinxu.senti@gmail.com"
             - name: CEO_SSH_KEY_PATH
               value: /var/run/secrets/ceo-git/ssh-privatekey
             - name: CEO_KNOWN_HOSTS_PATH
