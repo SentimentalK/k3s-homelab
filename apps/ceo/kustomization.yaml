@@ -13,3 +13,8 @@ resources:
   - resolver-deployment.yaml
   - resolver-service.yaml
   - ingress.yaml
+  - redis-infisical-secret.yaml
+  - redis-configmap.yaml
+  - redis-pvc.yaml
+  - redis-statefulset.yaml
+  - redis-service.yaml

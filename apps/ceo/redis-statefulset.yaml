@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ceo-redis
+  namespace: ceo
+  labels:
+    app: ceo-redis
+spec:
+  serviceName: ceo-redis-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ceo-redis
+  template:
+    metadata:
+      labels:
+        app: ceo-redis
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          imagePullPolicy: Always
+          command: ["/bin/sh", "/etc/redis-scripts/entrypoint.sh"]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-redis-secrets
+                  key: REDIS_PASSWORD
+          ports:
+            - name: redis
+              containerPort: 6379
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+          startupProbe:
+            exec:
+              command: ["/bin/sh", "/etc/redis-scripts/healthcheck.sh"]
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 60
+          readinessProbe:
+            exec:
+              command: ["/bin/sh", "/etc/redis-scripts/healthcheck.sh"]
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command: ["/bin/sh", "/etc/redis-scripts/healthcheck.sh"]
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: run
+              mountPath: /run/redis
+            - name: tmp
+              mountPath: /tmp
+            - name: redis-config
+              mountPath: /etc/redis-config
+              readOnly: true
+            - name: redis-scripts
+              mountPath: /etc/redis-scripts
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ceo-redis-data
+        - name: run
+          emptyDir:
+            medium: Memory
+            sizeLimit: 8Mi
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 4Mi
+        - name: redis-config
+          configMap:
+            name: ceo-redis-config
+            defaultMode: 0444
+            items:
+              - key: redis.conf
+                path: redis.conf
+        - name: redis-scripts
+          configMap:
+            name: ceo-redis-config
+            defaultMode: 0755
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
+              - key: healthcheck.sh
+                path: healthcheck.sh

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ceo-redis
+  namespace: ceo
+  labels:
+    app: ceo-redis
+spec:
+  type: ClusterIP
+  selector:
+    app: ceo-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ceo-redis-headless
+  namespace: ceo
+  labels:
+    app: ceo-redis
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: ceo-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis

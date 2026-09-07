@@ -71,6 +71,8 @@ spec:
                 secretKeyRef:
                   name: ceo-server-secrets
                   key: TOOLS_INTERNAL_TOKEN
+            - name: CEO_BRIDGE_ENABLED
+              value: "false"
           ports:
             - name: mcp
               containerPort: 3000

@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ceo-redis-config
+  namespace: ceo
+data:
+  redis.conf: |
+    bind 0.0.0.0
+    port 6379
+    protected-mode yes
+    daemonize no
+    logfile ""
+    loglevel notice
+    dir /data
+    appendonly yes
+    appendfsync always
+    no-appendfsync-on-rewrite no
+    save ""
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    maxmemory 256mb
+    maxmemory-policy noeviction
+  entrypoint.sh: |
+    #!/bin/sh
+    set -eu
+
+    password="${REDIS_PASSWORD:-}"
+
+    # 长度检查
+    [ "${#password}" -eq 64 ] || {
+      echo >&2 "Invalid Redis password configuration"
+      exit 1
+    }
+
+    # 字符检查（仅小写十六进制）
+    case "$password" in
+      *[!0-9a-f]*)
+        echo >&2 "Invalid Redis password configuration"
+        exit 1
+        ;;
+    esac
+
+    umask 077
+    mkdir -p /run/redis
+
+    # 复制非敏感配置到内存目录
+    cp /etc/redis-config/redis.conf /run/redis/redis.conf
+
+    # 在内存中追加 requirepass（不进 ConfigMap/Git/argv/日志）
+    printf '\nrequirepass %s\n' "$password" >> /run/redis/redis.conf
+
+    exec redis-server /run/redis/redis.conf
+  healthcheck.sh: |
+    #!/bin/sh
+    set -eu
+    export REDISCLI_AUTH="${REDIS_PASSWORD}"
+    reply="$(redis-cli -h 127.0.0.1 -p 6379 --raw PING)"
+    test "$reply" = "PONG"
