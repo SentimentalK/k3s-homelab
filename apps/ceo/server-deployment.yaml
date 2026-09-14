@@ -87,6 +87,8 @@ spec:
                   key: TOOLS_INTERNAL_TOKEN
             - name: CEO_BRIDGE_ENABLED
               value: "true"
+            - name: CEO_OAUTH_ENABLED
+              value: "true"
             - name: CEO_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:

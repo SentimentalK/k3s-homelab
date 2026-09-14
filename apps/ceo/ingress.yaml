@@ -46,6 +46,27 @@ spec:
                 name: ceo-server
                 port:
                   number: 3000
+          - path: /.well-known
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-server
+                port:
+                  number: 3000
+          - path: /authorize
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-server
+                port:
+                  number: 3000
+          - path: /token
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-server
+                port:
+                  number: 3000
           - path: /
             pathType: Prefix
             backend:
