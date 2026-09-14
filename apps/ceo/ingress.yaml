@@ -18,6 +18,13 @@ spec:
                 name: ceo-web
                 port:
                   number: 8080
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-web
+                port:
+                  number: 8080
           - path: /api
             pathType: Prefix
             backend:
@@ -32,6 +39,20 @@ spec:
                 name: ceo-server
                 port:
                   number: 3000
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-server
+                port:
+                  number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-web
+                port:
+                  number: 8080
   tls:
     - hosts:
         - ceo.sentimentalk.com

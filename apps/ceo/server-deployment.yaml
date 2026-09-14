@@ -60,6 +60,20 @@ spec:
                 secretKeyRef:
                   name: ceo-server-secrets
                   key: MCP_API_KEY
+            - name: GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-server-secrets
+                  key: GITHUB_CLIENT_ID
+                  optional: true
+            - name: GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-server-secrets
+                  key: GITHUB_CLIENT_SECRET
+                  optional: true
+            - name: CEO_PUBLIC_ORIGIN
+              value: https://ceo.sentimentalk.com
             - name: ALLOWED_HOSTS
               value: ceo.sentimentalk.com,agent.sentimentalk.com,localhost,127.0.0.1
             - name: CONTENT_RESOLVER_URL
