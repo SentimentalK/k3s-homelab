@@ -67,6 +67,13 @@ spec:
                 name: ceo-server
                 port:
                   number: 3000
+          - path: /register
+            pathType: Exact
+            backend:
+              service:
+                name: ceo-server
+                port:
+                  number: 3000
           - path: /
             pathType: Prefix
             backend:
