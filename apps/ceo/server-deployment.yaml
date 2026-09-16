@@ -72,6 +72,24 @@ spec:
                   name: ceo-server-secrets
                   key: GITHUB_CLIENT_SECRET
                   optional: true
+            - name: CEO_GITHUB_APP_ENABLED
+              value: "true"
+            - name: CEO_GITHUB_APP_SLUG
+              value: chief-everything-officer
+            - name: CEO_GITHUB_APP_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-server-secrets
+                  key: GITHUB_CLIENT_ID
+            - name: CEO_GITHUB_APP_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ceo-server-secrets
+                  key: GITHUB_CLIENT_SECRET
+            - name: CEO_GITHUB_APP_CALLBACK_URL
+              value: https://ceo.sentimentalk.com/auth/github-app/callback
+            - name: CEO_GITHUB_APP_PRIVATE_KEY_PATH
+              value: /var/run/secrets/ceo-github-app/private-key.pem
             - name: CEO_PUBLIC_ORIGIN
               value: https://ceo.sentimentalk.com
             - name: ALLOWED_HOSTS
@@ -138,6 +156,9 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
+            - name: github-app-key
+              mountPath: /var/run/secrets/ceo-github-app
+              readOnly: true
       volumes:
         - name: data
           hostPath:
@@ -150,6 +171,13 @@ spec:
             items:
               - key: SSH_PRIVATE_KEY
                 path: ssh-privatekey
+        - name: github-app-key
+          secret:
+            secretName: ceo-server-secrets
+            defaultMode: 0440
+            items:
+              - key: CEO_GITHUB_APP_PRIVATE_KEY
+                path: private-key.pem
         - name: git-known-hosts
           configMap:
             name: ceo-git-known-hosts
