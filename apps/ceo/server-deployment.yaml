@@ -109,6 +109,8 @@ spec:
               value: "true"
             - name: CEO_OAUTH_DCR_ENABLED
               value: "true"
+            - name: CEO_PROTOCOL_ALLOWED_ORIGINS
+              value: "https://gemini.google.com"
             - name: CEO_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
