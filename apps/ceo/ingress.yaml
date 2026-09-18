@@ -74,6 +74,13 @@ spec:
                 name: ceo-server
                 port:
                   number: 3000
+          - path: /onboarding
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-server
+                port:
+                  number: 3000
           - path: /
             pathType: Prefix
             backend:
