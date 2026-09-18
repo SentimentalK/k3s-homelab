@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: ceo
 resources:
   - namespace.yaml
-  - git-known-hosts.yaml
   - infisical-secret.yaml
   - server-deployment.yaml
   - server-service.yaml

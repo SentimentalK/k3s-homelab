@@ -39,27 +39,14 @@ spec:
           env:
             - name: CEO_DATA_ROOT
               value: /data
-            - name: CEO_REMOTE
-              value: git@github.com:SentimentalK/LifeOS.git
-            - name: CEO_BRANCH
-              value: main
             - name: CEO_GIT_AUTHOR_NAME
               value: "SentimentalK"
             - name: CEO_GIT_AUTHOR_EMAIL
               value: "kevinxu.senti@gmail.com"
-            - name: CEO_SSH_KEY_PATH
-              value: /var/run/secrets/ceo-git/ssh-privatekey
-            - name: CEO_KNOWN_HOSTS_PATH
-              value: /etc/ceo-git/known_hosts
             - name: BIND_HOST
               value: 0.0.0.0
             - name: PORT
               value: "3000"
-            - name: MCP_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ceo-server-secrets
-                  key: MCP_API_KEY
             - name: GITHUB_CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -152,12 +139,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            - name: git-key
-              mountPath: /var/run/secrets/ceo-git
-              readOnly: true
-            - name: git-known-hosts
-              mountPath: /etc/ceo-git
-              readOnly: true
             - name: tmp
               mountPath: /tmp
             - name: github-app-key
@@ -168,13 +149,6 @@ spec:
           hostPath:
             path: /home/ubuntu/codes/ceo-state-mcp
             type: DirectoryOrCreate
-        - name: git-key
-          secret:
-            secretName: ceo-server-secrets
-            defaultMode: 0440
-            items:
-              - key: SSH_PRIVATE_KEY
-                path: ssh-privatekey
         - name: github-app-key
           secret:
             secretName: ceo-server-secrets
@@ -182,10 +156,6 @@ spec:
             items:
               - key: CEO_GITHUB_APP_PRIVATE_KEY
                 path: private-key.pem
-        - name: git-known-hosts
-          configMap:
-            name: ceo-git-known-hosts
-            defaultMode: 0444
         - name: tmp
           emptyDir:
             medium: Memory
