@@ -25,6 +25,13 @@ spec:
                 name: ceo-web
                 port:
                   number: 8080
+          - path: /connector
+            pathType: Prefix
+            backend:
+              service:
+                name: ceo-server
+                port:
+                  number: 3000
           - path: /api
             pathType: Prefix
             backend:
