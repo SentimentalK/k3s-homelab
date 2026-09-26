@@ -81,6 +81,8 @@ spec:
               value: https://ceo.sentimentalk.com
             - name: ALLOWED_HOSTS
               value: ceo.sentimentalk.com,agent.sentimentalk.com,localhost,127.0.0.1
+            - name: ALLOWED_ORIGINS
+              value: "https://ceo.sentimentalk.com"
             - name: CONTENT_RESOLVER_URL
               value: http://ceo-resolver.ceo.svc.cluster.local:8000
             - name: CONTENT_RESOLVER_TIMEOUT_MS
