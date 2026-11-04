@@ -10,6 +10,6 @@ resources:
   - resolver-service.yaml
 images:
   - name: ghcr.io/sentimentalk/localtune
-    newTag: sha-4c09357
+    newTag: sha-b1f603e
   - name: ghcr.io/sentimentalk/localtune-resolver
-    newTag: sha-4c09357
+    newTag: sha-b1f603e
