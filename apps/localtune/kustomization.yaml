@@ -6,6 +6,10 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+  - resolver-deployment.yaml
+  - resolver-service.yaml
 images:
   - name: ghcr.io/sentimentalk/localtune
-    newTag: sha-5464c84
+    newTag: sha-4c09357
+  - name: ghcr.io/sentimentalk/localtune-resolver
+    newTag: sha-4c09357
