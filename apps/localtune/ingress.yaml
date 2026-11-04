@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: localtune
+  namespace: localtune
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: tune.mainstayx.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: localtune
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - tune.mainstayx.com
+      secretName: localtune-tls

@@ -13,3 +13,4 @@ resources:
   - tracking-tool-app.yaml
   - ceo-app.yaml
   - mainstayx-app.yaml
+  - localtune-app.yaml
