@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openwebui
+  namespace: openwebui
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: chat.sentimentalk.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openwebui
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - chat.sentimentalk.com
+      secretName: openwebui-tls

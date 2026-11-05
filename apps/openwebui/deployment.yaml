@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openwebui
+  namespace: openwebui
+  labels:
+    app: openwebui
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: openwebui
+  template:
+    metadata:
+      labels:
+        app: openwebui
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl3
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: openwebui
+          image: ghcr.io/open-webui/open-webui:v0.13.0-slim
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: WEBUI_URL
+              value: https://chat.sentimentalk.com
+            - name: ENABLE_SIGNUP
+              value: "false"
+            - name: ENABLE_CHANNELS
+              value: "true"
+            - name: ENABLE_APPS
+              value: "false"
+            - name: ENABLE_OAUTH_SIGNUP
+              value: "false"
+            - name: OAUTH_MERGE_ACCOUNTS_BY_EMAIL
+              value: "true"
+            - name: DEFAULT_USER_ROLE
+              value: pending
+            - name: JWT_EXPIRES_IN
+              value: 30d
+            - name: UVICORN_WORKERS
+              value: "1"
+            - name: WEBUI_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secrets
+                  key: WEBUI_SECRET_KEY
+            - name: WEBUI_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secrets
+                  key: WEBUI_ADMIN_EMAIL
+            - name: WEBUI_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secrets
+                  key: WEBUI_ADMIN_PASSWORD
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secrets
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: openwebui-secrets
+                  key: GOOGLE_CLIENT_SECRET
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /app/backend/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openwebui-data
