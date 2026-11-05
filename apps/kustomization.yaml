@@ -14,4 +14,3 @@ resources:
   - ceo-app.yaml
   - mainstayx-app.yaml
   - localtune-app.yaml
-  - openwebui-app.yaml
