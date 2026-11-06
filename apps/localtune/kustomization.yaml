@@ -8,4 +8,4 @@ resources:
   - ingress.yaml
 images:
   - name: ghcr.io/sentimentalk/localtune
-    newTag: sha-af6082e
+    newTag: sha-62fe02c
