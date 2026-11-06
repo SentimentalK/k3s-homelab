@@ -11,13 +11,6 @@ spec:
     - host: tune.mainstayx.com
       http:
         paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: localtune-resolver
-                port:
-                  number: 8787
           - path: /
             pathType: Prefix
             backend:
