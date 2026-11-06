@@ -33,7 +33,7 @@ spec:
       containers:
         - name: localtune
           image: ghcr.io/sentimentalk/localtune
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
