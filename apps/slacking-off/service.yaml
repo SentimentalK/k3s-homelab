@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: slacking-off
+  namespace: slacking-off
+  labels:
+    app.kubernetes.io/name: slacking-off
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: slacking-off
+  ports:
+    - name: http
+      port: 18080
+      targetPort: http
+      protocol: TCP

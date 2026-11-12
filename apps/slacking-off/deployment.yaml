@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slacking-off
+  namespace: slacking-off
+  labels:
+    app.kubernetes.io/name: slacking-off
+spec:
+  replicas: 1
+  # world.db is a single-writer SQLite file on a ReadWriteOnce local-path
+  # volume; never roll two pods at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: slacking-off
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: slacking-off
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: slacking-off
+          # Built on mtl0 and imported into the k3s containerd store:
+          #   docker build -f Dockerfile -t slacking-off:arm64 .
+          #   docker save slacking-off:arm64 | sudo k3s ctr images import -
+          # Not from a registry: the node is pinned to mtl0 and uses IfNotPresent.
+          image: slacking-off:arm64
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 18080
+              protocol: TCP
+          env:
+            - name: TMPDIR
+              value: /tmp
+            - name: MALLOC_ARENA_MAX
+              value: "2"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: slacking-off-data
+        - name: tmp
+          emptyDir: {}
