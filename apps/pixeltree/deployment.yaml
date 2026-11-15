@@ -35,7 +35,7 @@ spec:
         - name: pixeltree
           # Built from github.com/SentimentalK/pixeltree demo/Dockerfile (tag = commit) and imported
           # into the k3s containerd store on mtl0; not from a registry. See README.md.
-          image: pixeltree-demo:41580ae
+          image: pixeltree-demo:612bd77
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

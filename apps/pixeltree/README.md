@@ -43,7 +43,8 @@ origin directly can forge it. The single inference slot and the short queue stil
 
 Current values (deliberately conservative: mtl0 has 4 cores and runs other live apps):
 requests `cpu: 500m`, `memory: 2600Mi`; limits `cpu: "2"`, `memory: 3584Mi`; `PIXELTREE_THREADS=2`,
-`PIXELTREE_DEMO_QUEUE_MAX=1`. One parse takes ~10.6 s.
+`PIXELTREE_DEMO_QUEUE_MAX=1`. One parse takes ~10.6 s inside the pod; measured end to end through Cloudflare (10 sequential
+requests with the example 1920x1080 screenshot, 2026-11-15): p50 10.9 s, p95 17.3 s; pod memory ~2.3 GiB.
 
 To make it faster: set the cpu limit to `"3"`, `PIXELTREE_THREADS` to `"3"` (~8.1 s per parse) and
 `PIXELTREE_DEMO_QUEUE_MAX` to `"2"` (1 running + 2 queued still finish inside the 30 s timeout). Keep
