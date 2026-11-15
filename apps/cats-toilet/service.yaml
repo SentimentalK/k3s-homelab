@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cats-toilet
+  namespace: cats-toilet
+  labels:
+    app.kubernetes.io/name: cats-toilet
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: cats-toilet
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP

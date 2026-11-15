@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cats-toilet
+  namespace: cats-toilet
+  labels:
+    app.kubernetes.io/name: cats-toilet
+spec:
+  replicas: 1
+  # cats.db is a single-writer SQLite file on a ReadWriteOnce local-path
+  # volume, and presence / event streams live in the process's memory; never
+  # run two pods at once.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cats-toilet
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cats-toilet
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 15
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cats-toilet
+          # Built for arm64 and imported into the k3s containerd store on mtl0
+          # (see README.md). Not from a registry: the pod is pinned to mtl0 and
+          # uses IfNotPresent.
+          image: cats-toilet:arm64
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: "1"
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cats-toilet-data
+        - name: tmp
+          emptyDir: {}

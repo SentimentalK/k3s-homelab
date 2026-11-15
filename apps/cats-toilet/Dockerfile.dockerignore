@@ -1,0 +1,9 @@
+# Keep the build context to what the image copies.
+.git
+design
+tools
+assets/raw
+server/data
+server/test
+server/index.js
+server/API.md

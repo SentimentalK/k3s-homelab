@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cats-toilet
+  namespace: cats-toilet
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: cats.mainstayx.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cats-toilet
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - cats.mainstayx.com
+      secretName: cats-toilet-tls
