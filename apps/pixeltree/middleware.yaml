@@ -1,0 +1,25 @@
+# Edge limits for the public upload endpoint. The app enforces the same body limit again,
+# plus per-IP limits on /api/parse, a single inference slot and a short queue.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: body-limit
+  namespace: pixeltree
+spec:
+  buffering:
+    maxRequestBodyBytes: 8388608 # 8 MiB -> 413 before the request reaches the pod
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit
+  namespace: pixeltree
+spec:
+  rateLimit:
+    average: 60
+    period: 1m
+    burst: 40
+    sourceCriterion:
+      # Real client IP as set by Cloudflare (the site is proxied). Requests that reach the
+      # origin without Cloudflare can forge it; the app's single slot + queue still bounds load.
+      requestHeaderName: CF-Connecting-IP

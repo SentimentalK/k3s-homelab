@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pixeltree
+  namespace: pixeltree
+  labels:
+    app.kubernetes.io/name: pixeltree
+spec:
+  replicas: 1
+  # One inference slot per process by design; Recreate also avoids two model copies in memory during a rollout.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pixeltree
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pixeltree
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/arch: arm64
+        kubernetes.io/hostname: mtl0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: pixeltree
+          # Built from github.com/SentimentalK/pixeltree demo/Dockerfile (tag = commit) and imported
+          # into the k3s containerd store on mtl0; not from a registry. See README.md.
+          image: pixeltree-demo:41580ae
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: PIXELTREE_THREADS
+              value: "2" # = cpu limit; one 1920x1080 parse ~10.6 s on mtl0
+            # 1 running + 1 queued finish within the 30 s timeout (2 x ~11 s).
+            - name: PIXELTREE_DEMO_QUEUE_MAX
+              value: "1"
+            - name: MALLOC_ARENA_MAX
+              value: "2"
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 36 # model load: up to 3 min
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2600Mi
+            limits:
+              cpu: "2"
+              memory: 3584Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi

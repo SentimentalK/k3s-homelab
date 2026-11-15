@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pixeltree
+  namespace: pixeltree
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: pixeltree-ratelimit@kubernetescrd,pixeltree-body-limit@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: pixeltree.mainstayx.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pixeltree
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - pixeltree.mainstayx.com
+      secretName: pixeltree-tls

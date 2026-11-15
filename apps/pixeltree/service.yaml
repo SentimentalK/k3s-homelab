@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pixeltree
+  namespace: pixeltree
+  labels:
+    app.kubernetes.io/name: pixeltree
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: pixeltree
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
